@@ -1,14 +1,49 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cek User-Agent</title>
+    <title>Ujian Online</title>
 </head>
 <body>
-    <h1>User-Agent Anda adalah:</h1>
-    <div id="user-agent"></div>
+    <div id="konten-ujian" style="display:none;">
+        <h1>Selamat Mengerjakan Ujian</h1>
+        </div>
+    <div id="blokir-area">
+        <h1>Akses Ditolak</h1>
+        <p>Ujian ini hanya dapat diakses melalui aplikasi Examdam.</p>
+        <div id="form-password" style="display:none;">
+            <label for="password-buka">Masukkan Password:</label>
+            <input type="password" id="password-buka">
+            <button onclick="cekPassword()">Buka</button>
+            <p id="pesan-password" style="color:red;"></p>
+        </div>
+    </div>
 
     <script>
-        document.getElementById('user-agent').innerText = navigator.userAgent;
+        var userAgent = navigator.userAgent;
+        var blokirArea = document.getElementById('blokir-area');
+        var kontenUjian = document.getElementById('konten-ujian');
+        var formPassword = document.getElementById('form-password');
+        var pesanPassword = document.getElementById('pesan-password');
+        var passwordBenar = "passwordrahasia"; // Ganti dengan password yang kuat
+        var examdamUA = "ExamdamWebView"; // Ganti dengan user-agent sebenarnya
+
+        function cekPassword() {
+            var passwordInput = document.getElementById('password-buka').value;
+            if (passwordInput === passwordBenar) {
+                blokirArea.style.display = 'none';
+                kontenUjian.style.display = 'block';
+            } else {
+                pesanPassword.textContent = "Password salah.";
+            }
+        }
+
+        if (userAgent.indexOf(examdamUA) > -1) {
+            blokirArea.style.display = 'none';
+            kontenUjian.style.display = 'block';
+        } else {
+            blokirArea.style.display = 'block';
+            // formPassword.style.display = 'block'; // Aktifkan jika ingin opsi password
+        }
     </script>
 </body>
 </html>
