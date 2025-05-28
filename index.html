@@ -35,7 +35,7 @@
 </div>
 
 <script>
-    const EXAM_URL = "https://exam2.cbtdigimandiri.id";
+    const EXAM_URL = "https://www.google.com";
     const BLOCKER_ID = "blocker";
 
     function redirectToExam() {
@@ -46,8 +46,16 @@
         const userAgent = navigator.userAgent.toLowerCase();
         const isSEB = userAgent.includes("safeexambrowser");
         const isAndroid = userAgent.includes("android");
+        const isChrome = userAgent.includes("chrome");
+        const isFirefox = userAgent.includes("firefox");
 
-        return isSEB || isAndroid;
+        if (isSEB) {
+            return true;
+        }
+        if (isAndroid && !isChrome && !isFirefox) {
+            return true;
+        }
+        return false;
     }
 
     function checkAccess() {
