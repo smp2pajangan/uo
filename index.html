@@ -37,8 +37,8 @@
     <div class="container">
         <div id="blocked-message" class="hidden">
             <h1>AKSES DIBLOKIR</h1>
-            <p>Halaman ini hanya dapat diakses melalui aplikasi BRO EXAM.</p>
-            <p>Silakan unduh aplikasi BRO EXAM dari Play Store.</p>
+            <p>Halaman ini hanya dapat diakses melalui aplikasi yang menggunakan WebView khusus.</p>
+            <p>Jika Anda melihat pesan ini di browser biasa (Chrome, Firefox, dll.), akses diblokir.</p>
         </div>
         <div id="redirect-message" class="hidden">
             <p>Mengarahkan Anda ke halaman...</p>
@@ -47,36 +47,50 @@
 
     <script>
         const targetUrl = 'https://smp2pajangan.github.io/customlink';
-        // Contoh skema URL kustom. Ini hanya akan berfungsi jika BRO EXAM terdaftar untuk menangani skema ini.
-        const broExamAppScheme = 'broexam://open?url=' + encodeURIComponent(targetUrl);
 
-        function isBroExam() {
+        function isWebView() {
             const userAgent = navigator.userAgent.toLowerCase();
-            // Mengecek apakah string 'bro-exam-client' ada di User Agent
-            return userAgent.includes('bro-exam-client');
+            const isAndroid = /android/.test(userAgent);
+            const isiOS = /(iphone|ipad|ipod)/.test(userAgent);
+
+            // Deteksi WebView di Android
+            // Umumnya, WebView Android tidak memiliki string 'chrome' atau 'safari' yang lengkap
+            // tetapi bisa memiliki 'wv' atau 'chrome' yang diikuti dengan 'mobile' atau 'android' tanpa 'version'
+            // Ini adalah heuristic (perkiraan) dan tidak 100% pasti.
+            if (isAndroid) {
+                if (userAgent.includes('wv') || (userAgent.includes('android') && !userAgent.includes('chrome') && !userAgent.includes('firefox'))) {
+                    return true;
+                }
+            }
+
+            // Deteksi WebView di iOS
+            // Di iOS, banyak aplikasi menggunakan UIWebView atau WKWebView.
+            // String 'safari' biasanya tidak ada di WebView iOS.
+            if (isiOS) {
+                if (!userAgent.includes('safari') && (userAgent.includes('mobile') || userAgent.includes('ipad'))) {
+                    return true;
+                }
+            }
+
+            // Fallback untuk deteksi WebView umum, mungkin kurang spesifik
+            // Ini bisa mencakup banyak lingkungan non-browser penuh
+            if (!userAgent.includes('chrome') && !userAgent.includes('firefox') && !userAgent.includes('safari') && !userAgent.includes('edge')) {
+                return true;
+            }
+
+            return false;
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             const blockedMessage = document.getElementById('blocked-message');
             const redirectMessage = document.getElementById('redirect-message');
 
-            if (isBroExam()) {
+            if (isWebView()) {
                 redirectMessage.classList.remove('hidden');
-                // Coba buka dengan skema URL kustom.
-                // Jika BRO EXAM tidak terinstal atau tidak mendukung skema ini,
-                // browser mungkin akan menampilkan kesalahan atau tidak melakukan apa-apa.
-                window.location.href = broExamAppScheme;
-
-                // Fallback setelah beberapa waktu jika skema kustom tidak berfungsi
-                // (misalnya, jika BRO EXAM tidak terinstal atau tidak mengenali skema)
-                // Ini akan mengarahkan ke URL target melalui browser, yang mungkin bukan yang Anda inginkan
-                // jika tujuannya adalah melarang akses via browser.
-                // Pertimbangkan untuk menghapus baris ini jika Anda ingin *memblokir* browser secara total.
-                setTimeout(() => {
-                    window.location.href = targetUrl;
-                }, 500); // Beri waktu singkat untuk skema kustom bekerja
+                // Langsung arahkan ke URL target jika dideteksi sebagai WebView
+                window.location.href = targetUrl;
             } else {
-                // Tampilkan pesan diblokir jika bukan BRO EXAM yang terdeteksi
+                // Tampilkan pesan diblokir jika bukan WebView (diasumsikan browser biasa)
                 blockedMessage.classList.remove('hidden');
             }
         });
