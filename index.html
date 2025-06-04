@@ -47,42 +47,37 @@
 
     <script>
         const targetUrl = 'https://smp2pajangan.github.io/customlink';
-        const broExamAppScheme = 'broexam://open?url=' + encodeURIComponent(targetUrl); // Contoh: Skema URL kustom jika BRO EXAM mendukungnya
+        // Contoh skema URL kustom. Ini hanya akan berfungsi jika BRO EXAM terdaftar untuk menangani skema ini.
+        const broExamAppScheme = 'broexam://open?url=' + encodeURIComponent(targetUrl);
 
         function isBroExam() {
             const userAgent = navigator.userAgent.toLowerCase();
-            // Ini adalah bagian yang SANGAT TIDAK RELIABEL.
-            // BRO EXAM mungkin tidak menambahkan string unik ke userAgent-nya.
-            // Jika ada, Anda bisa menambahkannya di sini.
-            // Contoh: if (userAgent.includes('broexam_identifier')) { return true; }
-            return false; // Secara default, kita asumsikan bukan BRO EXAM jika tidak ada deteksi khusus
+            // Mengecek apakah string 'bro-exam-client' ada di User Agent
+            return userAgent.includes('bro-exam-client');
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             const blockedMessage = document.getElementById('blocked-message');
             const redirectMessage = document.getElementById('redirect-message');
 
-            // Coba deteksi BRO EXAM (ini sangat tidak dapat diandalkan)
             if (isBroExam()) {
                 redirectMessage.classList.remove('hidden');
-                // Coba buka dengan skema URL kustom, jika didukung oleh BRO EXAM
+                // Coba buka dengan skema URL kustom.
+                // Jika BRO EXAM tidak terinstal atau tidak mendukung skema ini,
+                // browser mungkin akan menampilkan kesalahan atau tidak melakukan apa-apa.
                 window.location.href = broExamAppScheme;
+
                 // Fallback setelah beberapa waktu jika skema kustom tidak berfungsi
+                // (misalnya, jika BRO EXAM tidak terinstal atau tidak mengenali skema)
+                // Ini akan mengarahkan ke URL target melalui browser, yang mungkin bukan yang Anda inginkan
+                // jika tujuannya adalah melarang akses via browser.
+                // Pertimbangkan untuk menghapus baris ini jika Anda ingin *memblokir* browser secara total.
                 setTimeout(() => {
                     window.location.href = targetUrl;
-                }, 1000); // Beri waktu sebentar untuk skema kustom
+                }, 500); // Beri waktu singkat untuk skema kustom bekerja
             } else {
-                // Periksa apakah ini browser umum
-                const isCommonBrowser = /chrome|firefox|safari|edge|opera|samsungbrowser/.test(navigator.userAgent.toLowerCase());
-
-                if (isCommonBrowser) {
-                    blockedMessage.classList.remove('hidden');
-                } else {
-                    // Jika bukan browser umum dan bukan BRO EXAM yang terdeteksi,
-                    // asumsikan itu adalah lingkungan yang tidak didukung atau kita tidak bisa mendeteksinya.
-                    // Dalam kasus ini, kita tetap menampilkan pesan blokir untuk keamanan.
-                    blockedMessage.classList.remove('hidden');
-                }
+                // Tampilkan pesan diblokir jika bukan BRO EXAM yang terdeteksi
+                blockedMessage.classList.remove('hidden');
             }
         });
     </script>
